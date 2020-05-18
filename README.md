@@ -2,6 +2,8 @@
 Copies one dynamo DB to another
 
 This script will copy one DynamoDB table to another one along with it's metadata.
+This uses `multiprocessing.Process` to have multiple parallel scanners on the source table in order to
+**significantly improve the performance** (and decrease the runtime).
 
 ## How to run
 
