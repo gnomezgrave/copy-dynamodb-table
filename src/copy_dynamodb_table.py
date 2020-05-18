@@ -3,6 +3,9 @@ from multiprocessing import Process, SimpleQueue
 
 import boto3
 
+MAX_PROCESSES = 20
+DEFAULT_PROCESSES = 5
+
 
 class DynamoDBScanner(Process):
     def __init__(self, scanner_id, total_scanners, source_table_name, target_table_name, results_queue):
@@ -181,7 +184,7 @@ if __name__ == "__main__":
     parser.add_argument('-t', '--target', metavar='target', type=str, nargs='?', required=True,
                         help='Target DynamoDB table name')
 
-    parser.add_argument('-n', '--num-threads', metavar='threads', type=int, nargs='?', default=5,
+    parser.add_argument('-n', '--num-threads', metavar='threads', type=int, nargs='?', default=DEFAULT_PROCESSES,
                         help='Number of parallel threads/processes to scan the DynamoDB table.')
 
     parser.add_argument('-c', '--create-table', action='store_true',
@@ -191,5 +194,9 @@ if __name__ == "__main__":
                         help='Whether additional information such as Streams, Tags, Encryption should be copied.')
 
     args = parser.parse_args()
+
+    if args.num_threads < 1 or args.num_threads > MAX_PROCESSES:
+        print(f"Invalid input for -n(--num-threads). Defaulting to {DEFAULT_PROCESSES}.")
+        args.num_threads = DEFAULT_PROCESSES
 
     main(args.source, args.target, args.num_threads, args.create_table, args.verbose_copy)
