@@ -1,9 +1,18 @@
 # Copy Dynamo DB Table
 Copies one Dynamo DB Table to another
 
-This script will copy one DynamoDB table to another one along with it's metadata.
+This script will copy one DynamoDB table to another one along with it's metadata.  
 This uses `multiprocessing.Process` to have multiple parallel scanners on the source table in order to
 **significantly improve the performance** (and decrease the runtime).
+
+## Prerequisites
+
+* This script should be run on an environment where `awscli` is already configured.
+    * Otherwise, you need to export these environment variables.  
+    `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` and `AWS_DEFAULT_REGION`  
+* Python3 (3.7+) to run this script.
+* IAM Role corresponding to `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` **MUST** have the privileges to  
+read from the source table and create new tables.
 
 ## How to run
 
@@ -20,6 +29,12 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
+or
+
+```shell script
+pip3 install -r requirements.txt
+```
+
 ### Running the script
 
 Go to the `src` directory:
@@ -32,9 +47,21 @@ Get help about the script:
 python copy_dynamodb_table.py [-h]
 ```
 
+or
+
+```shell script
+python3 copy_dynamodb_table.py [-h]
+```
+
 Perform copy:
 ```shell script
 python copy_dynamodb_table.py -s <source_table_name> -t <target_table_name> [-c] [-v]
+```
+
+or
+
+```shell script
+python3 copy_dynamodb_table.py -s <source_table_name> -t <target_table_name> [-c] [-v]
 ```
 
 **Param/Flag** | **Purpose** |
@@ -49,4 +76,10 @@ Example:
 
 ```shell script
 python copy_dynamodb_table.py -n 10 -c -v -s prod_table -t dev_table
+```
+
+or
+
+```shell script
+python3 copy_dynamodb_table.py -n 10 -c -v -s prod_table -t dev_table
 ```
