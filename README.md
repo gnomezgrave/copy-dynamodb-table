@@ -37,14 +37,14 @@ python copy_dynamodb_table.py -s <source_table_name> -t <target_table_name> [-c]
 
 **Param/Flag** | **Purpose** |
 | ------------- |:-------------|
-| `-s` or `--source` | Name of the source DynamoDB table |
-| `-t` or `--target` | Name of the target DynamoDB table |
-| `-n` or `--num-threads` | Number of parallel threads/processes to scan the source table |
+| `-s` or `--source` | Name of the source DynamoDB table (Required) |
+| `-t` or `--target` | Name of the target DynamoDB table (Required) |
+| `-n` or `--num-threads` | Number of parallel threads/processes to scan the source table (default=`5`) |
 | `-c` or `--create-table` | Whether to create the target table if it does not exist (`False` if not passed) |
 | `-v` or `--verbose-copy` | Whether to copy additional information (i.e. Tags, Encryption, Stream) (`False` if not passed) |
 
 Example:
 
 ```shell script
-python copy_dynamodb_table.py -s prod_table -t dev_table -c -v
+python copy_dynamodb_table.py -n 10 -c -v -s prod_table -t dev_table
 ```
