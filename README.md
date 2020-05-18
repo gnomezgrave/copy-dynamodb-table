@@ -1,5 +1,5 @@
 # Copy Dynamo DB Table
-Copies one dynamo DB to another
+Copies one Dynamo DB Table to another
 
 This script will copy one DynamoDB table to another one along with it's metadata.
 This uses `multiprocessing.Process` to have multiple parallel scanners on the source table in order to
