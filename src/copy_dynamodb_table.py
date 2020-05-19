@@ -8,6 +8,10 @@ DEFAULT_PROCESSES = 5
 
 
 class DynamoDBScanner(Process):
+    """
+    This class inherits from multiprocessing.Process and scans through the source DynamoDB table and copies it to the
+    target DynamoDB table.
+    """
     def __init__(self, scanner_id, total_scanners, source_table_name, target_table_name, results_queue):
         super(DynamoDBScanner, self).__init__()
         self.scanner_id = scanner_id
@@ -20,6 +24,10 @@ class DynamoDBScanner(Process):
         self.results_queue = results_queue
 
     def run(self):
+        """
+        Re-implements Process.run()
+        :return: None
+        """
         print(f"Starting scanner {self.scanner_id} of {self.total_scanners}")
         total_items = 0
         kwargs = {}
@@ -87,29 +95,43 @@ def main(source_table_name, target_table_name, num_threads, create_table, verbos
             for i in range(0, num_threads)
         ]
 
+        # Start all the scanners
         for scanner in scanners:
             scanner.start()
 
+        # Wait for all the scanner to finish
         for scanner in scanners:
             scanner.join()
 
+        # Extract the counts from the scanners
         total = 0
         for i in range(0, num_threads):
             total += results_queue.get()
 
+        print(f"Total {total} records were copied from {source_table_name} to {target_table_name}.")
+
     except dynamodb_client.exceptions.ResourceNotFoundException as e:
         print(f"Source table = {source_table_name} does not exist.")
+        raise e
     except Exception as e:
         print(f"Something went wrong while running the script :(")
         raise e
 
 
 def create_dynamodb_table(dynamodb_client, table_name, source_table_desc, verbose_copy=True):
-
+    """
+    Creates a new DynamoDB table
+    :param dynamodb_client: DynamoDB Client to work with
+    :param table_name: Name of the table to be created
+    :param source_table_desc: 'Table' element of the dynamodb_client.describe_table(source_table)
+    :param verbose_copy: Whether to copy additional metadata from the source table
+    :return:
+    """
     print(f"Creating DynamoDB table: {table_name}")
     billing_mode = source_table_desc['BillingModeSummary']['BillingMode']
     key_schema = source_table_desc['KeySchema']
     attr_schema = source_table_desc['AttributeDefinitions']
+
     provisioned_throughput = {
         key: value
         for key, value in source_table_desc['ProvisionedThroughput'].items()
@@ -130,6 +152,8 @@ def create_dynamodb_table(dynamodb_client, table_name, source_table_desc, verbos
         for param in params:
             if param in source_table_desc:
                 kwargs[param] = source_table_desc[param]
+
+        #  Add encryption information if available
         if 'SSEDescription' in source_table_desc:
             sse_desc = source_table_desc['SSEDescription']
             kwargs['SSESpecification'] = {
@@ -154,6 +178,12 @@ def create_dynamodb_table(dynamodb_client, table_name, source_table_desc, verbos
 
 
 def _get_table_tags(dynamodb_client, table_arn):
+    """
+    Extracts tags from the given DynamoDB table ARN
+    :param dynamodb_client: DynamoDB client to work with
+    :param table_arn: ARN of the source DynamoDB table
+    :return: List of Tags
+    """
     tags = []
     kwargs = {}
     while True:
@@ -167,6 +197,7 @@ def _get_table_tags(dynamodb_client, table_arn):
 
         kwargs['NextToken'] = response['NextToken']
 
+    #  Add the Source Table as a tag (just for the record)
     tags.append(
         {'Source_Table': table_arn}
     )

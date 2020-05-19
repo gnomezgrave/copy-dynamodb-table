@@ -83,3 +83,7 @@ or
 ```shell script
 python3 copy_dynamodb_table.py -n 10 -c -v -s prod_table -t dev_table
 ```
+
+## Note
+It's advised to run this script on a powerful computer because otherwise, it will take a lot of time to finish for a larger table.  
+Running on a powerful AWS EC2 instance will benefit a lot since it will reduce the network overhead.
